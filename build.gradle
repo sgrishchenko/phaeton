@@ -1,0 +1,61 @@
+buildscript {
+	ext {
+		springBootVersion = '1.4.3.RELEASE'
+	}
+	repositories {
+		mavenCentral()
+	}
+	dependencies {
+		classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
+	}
+}
+
+apply plugin: 'java'
+apply plugin: 'groovy'
+apply plugin: 'checkstyle'
+apply plugin: 'jacoco'
+apply plugin: 'org.springframework.boot'
+
+jar {
+	baseName = 'phaeton'
+	version = '0.0.1-SNAPSHOT'
+}
+
+sourceCompatibility = 1.8
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	compile 'org.springframework.boot:spring-boot-starter-data-jpa'
+	compile 'org.springframework.boot:spring-boot-starter-validation'
+	compile 'com.fasterxml.jackson.core:jackson-databind'
+
+	//runtime('org.springframework.boot:spring-boot-devtools')
+	runtime 'com.h2database:h2'
+
+	testCompile 'org.springframework.boot:spring-boot-starter-test'
+	testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
+}
+
+wrapper {
+	gradleVersion = '3.2.1'
+}
+
+checkstyle {
+	toolVersion = '7.3'
+}
+
+javadoc {
+	options = new StandardJavadocDocletOptions()
+	options.links = [
+			"http://docs.oracle.com/javase/8/docs/api/",
+			"http://docs.oracle.com/javase/8/javafx/api/",
+			"http://www.objecthunter.net/exp4j/apidocs/"
+	]
+}
+
+jacoco {
+	toolVersion = '0.7.8'
+}

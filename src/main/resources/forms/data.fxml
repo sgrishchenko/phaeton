@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.*?>
+
+<ScrollPane hbarPolicy="NEVER" minWidth="600.0" prefHeight="400.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="vsu.sc.grishchenko.phaeton.database.TrajectoriesController">
+    <content>
+      <VBox alignment="CENTER_LEFT">
+         <children>
+            <HBox>
+               <children>
+                   <ChoiceBox fx:id="experiment" prefWidth="150.0">
+                       <HBox.margin>
+                           <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+                       </HBox.margin>
+                   </ChoiceBox>
+                   <ChoiceBox fx:id="trajectories" prefWidth="150.0">
+                       <HBox.margin>
+                           <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+                       </HBox.margin>
+                   </ChoiceBox>
+               </children>
+            </HBox>
+              <GridPane fx:id="table" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefWidth="598.0">
+                  <columnConstraints>
+                      <ColumnConstraints hgrow="SOMETIMES" />
+                      <ColumnConstraints hgrow="SOMETIMES" />
+                  </columnConstraints>
+                  <rowConstraints>
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  </rowConstraints>
+                  <children>
+                      <Label styleClass="header" text="Название расчета" GridPane.halignment="CENTER" />
+                  </children>
+              </GridPane>
+         </children>
+         <padding>
+            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+         </padding>
+      </VBox>
+    </content>
+</ScrollPane>

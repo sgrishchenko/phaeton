@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.*?>
+<?import java.lang.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox prefHeight="400.0" prefWidth="700.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="vsu.sc.grishchenko.phaeton.main.MainController">
+    <stylesheets>
+        <URL value="@../style/fields.css" />
+    </stylesheets>
+    <children>
+        <MenuBar VBox.vgrow="NEVER">
+            <menus>
+                <Menu mnemonicParsing="false" text="Файл">
+                    <items>
+                        <MenuItem mnemonicParsing="false" onAction="#open" text="Открыть" />
+                        <MenuItem mnemonicParsing="false" onAction="#save" text="Сохранить" />
+                        <MenuItem mnemonicParsing="false" onAction="#saveAs" text="Сохранить как..." />
+                        <MenuItem mnemonicParsing="false" text="Настройки…" />
+                    </items>
+                </Menu>
+                <Menu mnemonicParsing="false" text="Редактировать">
+                    <items>
+                        <Menu mnemonicParsing="false" text="Добавить">
+                            <items>
+                                <MenuItem mnemonicParsing="false" onAction="#addCluster" text="Кластер" />
+                                <Menu mnemonicParsing="false" fx:id="clusterMenu" text="Частицу" />
+                            </items>
+                        </Menu>
+                        <Menu mnemonicParsing="false" text="Удалить">
+                            <items>
+                                <MenuItem mnemonicParsing="false" onAction="#deleteAll" text="Все" />
+                                <MenuItem mnemonicParsing="false" onAction="#deleteSelected" text="Выбранные" />
+                            </items>
+                        </Menu>
+                    </items>
+                </Menu>
+                <Menu mnemonicParsing="false" text="Эксперименты">
+                    <items>
+                        <MenuItem mnemonicParsing="false" onAction="#run" text="Запустить" />
+                        <MenuItem mnemonicParsing="false" text="Задание" />
+                        <MenuItem mnemonicParsing="false" text="База данных" />
+                    </items>
+                </Menu>
+            </menus>
+        </MenuBar>
+        <AnchorPane maxHeight="-1.0" maxWidth="-1.0" prefHeight="-1.0" prefWidth="-1.0" VBox.vgrow="ALWAYS">
+            <children>
+                  <TreeTableView fx:id="table" editable="true" showRoot="false" tableMenuButtonVisible="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                      <columns>
+                          <TreeTableColumn prefWidth="60.0" userData="{T(vsu.sc.grishchenko.phaeton.model.Cluster):'#this', T(vsu.sc.grishchenko.phaeton.model.MotionEquation):'#this'}" />
+                          <TreeTableColumn prefWidth="75.0" text="Частица" userData="{T(vsu.sc.grishchenko.phaeton.model.Cluster):'&quot;Кластер:&quot;', T(vsu.sc.grishchenko.phaeton.model.MotionEquation):'#this.label'}" />
+                          <TreeTableColumn prefWidth="300.0" text="Модуль действующей силы" userData="{T(vsu.sc.grishchenko.phaeton.model.Cluster):'#this.name', T(vsu.sc.grishchenko.phaeton.model.MotionEquation):'#this.accelerationEquation'}" />
+                          <TreeTableColumn prefWidth="75.0" text="X" userData="{T(vsu.sc.grishchenko.phaeton.model.MotionEquation):'#this.initialPosition.x'}" />
+                          <TreeTableColumn prefWidth="75.0" text="Y" userData="{T(vsu.sc.grishchenko.phaeton.model.MotionEquation):'#this.initialPosition.y'}" />
+                          <TreeTableColumn prefWidth="75.0" text="Z" userData="{T(vsu.sc.grishchenko.phaeton.model.MotionEquation):'#this.initialPosition.z'}" />
+                          <TreeTableColumn prefWidth="75.0" text="Vx" userData="{T(vsu.sc.grishchenko.phaeton.model.MotionEquation):'#this.initialVelocity.x'}" />
+                          <TreeTableColumn prefWidth="75.0" text="Vy" userData="{T(vsu.sc.grishchenko.phaeton.model.MotionEquation):'#this.initialVelocity.y'}" />
+                          <TreeTableColumn prefWidth="75.0" text="Vz" userData="{T(vsu.sc.grishchenko.phaeton.model.MotionEquation):'#this.initialVelocity.z'}" />
+                          <TreeTableColumn prefWidth="75.0" text="Масса" userData="{T(vsu.sc.grishchenko.phaeton.model.MotionEquation):'#this.weight'}" />
+                          <TreeTableColumn prefWidth="100.0" text="Связи" userData="{T(vsu.sc.grishchenko.phaeton.model.MotionEquation):'#this.linkLabels'}" />
+                          <TreeTableColumn prefWidth="60.0" text="Цвет" userData="{T(vsu.sc.grishchenko.phaeton.model.MotionEquation):'#this.color'}" />
+                      </columns>
+                  </TreeTableView>
+            </children>
+        </AnchorPane>
+    </children>
+</VBox>
