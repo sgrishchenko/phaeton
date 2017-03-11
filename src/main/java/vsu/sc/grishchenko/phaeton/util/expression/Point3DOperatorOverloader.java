@@ -7,12 +7,16 @@ import org.springframework.expression.OperatorOverloader;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
+import java.util.DoubleSummaryStatistics;
 import java.util.List;
 
 import static org.springframework.expression.Operation.*;
 
 @Component
 public class Point3DOperatorOverloader implements OperatorOverloader {
+
+    private static final List<Operation> OPERATIONS_FOR_SCALAR = Arrays.asList(MULTIPLY, ADD, SUBTRACT);
+
     @Override
     public boolean overridesOperation(Operation operation, Object leftOperand, Object rightOperand)
             throws EvaluationException {
@@ -25,7 +29,7 @@ public class Point3DOperatorOverloader implements OperatorOverloader {
         boolean anyScalar = operands.stream().anyMatch(o -> o instanceof Point3D)
                 && operands.stream().anyMatch(o -> o instanceof Number);
 
-        return (anyScalar && operation == MULTIPLY) || allVectors;
+        return (anyScalar && OPERATIONS_FOR_SCALAR.contains(operation)) || allVectors;
     }
 
     @Override
@@ -53,9 +57,20 @@ public class Point3DOperatorOverloader implements OperatorOverloader {
             }
         } else {
             Point3D vector = filterOperands(operands, Point3D.class);
-            Number scalar = filterOperands(operands, Number.class);
+            Double scalar = Double.parseDouble(filterOperands(operands, Number.class).toString());
 
-            return vector.multiply(Double.parseDouble(scalar.toString()));
+            switch (operation) {
+                case ADD:
+                    return vector.add(new Point3D(scalar, scalar, scalar));
+                case SUBTRACT:
+                    return leftOperand.equals(vector)
+                            ? vector.subtract(new Point3D(scalar, scalar, scalar))
+                            : new Point3D(scalar, scalar, scalar).subtract(vector);
+                case MULTIPLY:
+                    return vector.multiply(Double.parseDouble(scalar.toString()));
+                default:
+                    throw new UnsupportedOperationException();
+            }
         }
     }
 

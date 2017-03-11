@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import vsu.sc.grishchenko.phaeton.model.Cluster;
 
 import java.util.*;
 import java.util.function.Function;
@@ -39,6 +40,11 @@ public class View3D extends Application {
     @Autowired
     @Qualifier("scene3D")
     private Scene scene3D;
+    @Autowired
+    @Qualifier("atoms")
+    private Group atoms;
+
+    private List<Cluster> clusters;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -46,5 +52,26 @@ public class View3D extends Application {
         primaryStage.setTitle("Трехмерная анимированная модель");
         primaryStage.setScene(scene);
         primaryStage.show();
+
+        atoms.getChildren().clear();
+        RunAnimate animation = new RunAnimate(clusters,
+                atoms,
+                15,
+                20);
+        Thread animationThread = new Thread(animation);
+        animationThread.start();
+
+        primaryStage.setOnCloseRequest(event -> {
+            animation.stop();
+            try {
+                animationThread.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+    public void setClusters(List<Cluster> clusters) {
+        this.clusters = clusters;
     }
 }

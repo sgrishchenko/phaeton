@@ -29,6 +29,7 @@ public class Solver {
 
         List<MotionEquationFeatures> features = motionEquations
                 .stream()
+                .peek(equation -> equation.getPath().clear())
                 .map(this::features)
                 .collect(Collectors.toList());
 
@@ -41,7 +42,6 @@ public class Solver {
 
         features.forEach(equation -> {
             Point3D initialAcceleration = (Point3D) equation.getExpression().getValue(context);
-
             equation.setLastPosition(equation.getLastButOnePosition()
                     .add(equation.getValue().getInitialVelocity().multiply(stepSize))
                     .add(initialAcceleration.multiply(Math.pow(stepSize, 2) / 2)));
@@ -53,8 +53,6 @@ public class Solver {
         //iteration
         initialTime += 2 * stepSize;
         for (int i = 2; i < countSteps; i++, initialTime += stepSize) {
-            context.setVariable("t", initialTime);
-
             context.setVariable("t", initialTime);
             context.setVariables(features.stream().collect(Collectors.toMap(
                     equation -> equation.getValue().getLabel(),

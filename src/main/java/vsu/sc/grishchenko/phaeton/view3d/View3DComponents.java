@@ -67,7 +67,8 @@ public class View3DComponents {
     }
 
     @Bean
-    public SubScene subScene3D(@Qualifier("axes") List<Cylinder> axes) {
+    public SubScene subScene3D(@Qualifier("axes") List<Cylinder> axes,
+                               @Qualifier("atoms") Group atoms) {
         Group root = new Group();
         SubScene subScene = new SubScene(root, sceneWidth, sceneHeight - buttonsHeight, true, BALANCED);
         PerspectiveCamera camera = new PerspectiveCamera(true);
@@ -79,6 +80,7 @@ public class View3DComponents {
         camera.setTranslateZ(cameraInitialDistance);
 
         root.getChildren().addAll(axes);
+        root.getChildren().add(atoms);
 
         return subScene;
     }
@@ -123,5 +125,10 @@ public class View3DComponents {
 
         axisList.forEach(axis -> axis.setMaterial(new PhongMaterial(Color.BLACK)));
         return axisList;
+    }
+
+    @Bean
+    public Group atoms() {
+        return new Group();
     }
 }

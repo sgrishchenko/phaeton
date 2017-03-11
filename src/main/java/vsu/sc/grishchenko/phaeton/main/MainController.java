@@ -14,6 +14,7 @@ import org.springframework.expression.Expression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.stereotype.Controller;
+import vsu.sc.grishchenko.phaeton.math.Solver;
 import vsu.sc.grishchenko.phaeton.model.Cluster;
 import vsu.sc.grishchenko.phaeton.model.MotionEquation;
 import vsu.sc.grishchenko.phaeton.view3d.View3D;
@@ -39,6 +40,8 @@ public class MainController implements Initializable {
     private StandardEvaluationContext context;
     @Autowired
     private View3D view3D;
+    @Autowired
+    private Solver solver;
 
     private Map<TreeItem<Object>, CheckBox> checkBoxMap = new HashMap<>();
 
@@ -176,7 +179,15 @@ public class MainController implements Initializable {
     }
 
     public void run() throws Exception {
+        @SuppressWarnings("unchecked")
+        List<Cluster> clusters = (List<Cluster>) table.getRoot().getValue();
+        solver.solve(clusters
+                .stream()
+                .flatMap(cluster -> cluster.getMotionEquations().stream())
+                .collect(Collectors.toList()), 0, 1000, 0.001);
+
         view3D.stop();
+        view3D.setClusters(clusters);
         view3D.start(new Stage());
     }
 }

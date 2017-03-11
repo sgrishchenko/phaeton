@@ -33,7 +33,7 @@ public class EditService {
         menuItem.setUserData(cluster);
         menuItem.setOnAction(event -> {
             MotionEquation motionEquation = new MotionEquation();
-            String label = String.format("r%d-%d",
+            String label = String.format("r%d_%d",
                     table.getRoot().getChildren().indexOf(clusterItem) + 1,
                     clusterItem.getChildren().size() + 1);
             motionEquation.setLabel(label);
