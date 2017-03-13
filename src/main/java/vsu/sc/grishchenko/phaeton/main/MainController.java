@@ -188,6 +188,6 @@ public class MainController implements Initializable {
 
         view3D.stop();
         view3D.setClusters(clusters);
-        view3D.start(new Stage());
+        view3D.start();
     }
 }

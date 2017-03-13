@@ -40,7 +40,7 @@
                                  userData="{T(vsu.sc.grishchenko.phaeton.model.Cluster):'#this', T(vsu.sc.grishchenko.phaeton.model.MotionEquation):'#this'}"/>
                 <TreeTableColumn prefWidth="75.0" text="Частица"
                                  userData="{T(vsu.sc.grishchenko.phaeton.model.Cluster):'&quot;Кластер:&quot;', T(vsu.sc.grishchenko.phaeton.model.MotionEquation):'#this.label'}"/>
-                <TreeTableColumn prefWidth="300.0" text="Модуль действующей силы"
+                <TreeTableColumn prefWidth="400.0" text="Модуль действующей силы"
                                  userData="{T(vsu.sc.grishchenko.phaeton.model.Cluster):'#this.name', T(vsu.sc.grishchenko.phaeton.model.MotionEquation):'#this.accelerationEquation'}"/>
                 <TreeTableColumn prefWidth="75.0" text="X"
                                  userData="{T(vsu.sc.grishchenko.phaeton.model.MotionEquation):'#this.initialPosition.x'}"/>

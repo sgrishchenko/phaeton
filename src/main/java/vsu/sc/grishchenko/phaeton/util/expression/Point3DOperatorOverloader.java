@@ -44,10 +44,10 @@ public class Point3DOperatorOverloader implements OperatorOverloader {
                     return left.add(right);
                 case SUBTRACT:
                     return left.subtract(right);
-                case MODULUS:
-                    return left.distance(right);
                 case DIVIDE:
-                    return left.midpoint(right);
+                    return left.distance(right);
+                case MODULUS:
+                    return left.subtract(right).normalize();
                 case MULTIPLY:
                     return left.crossProduct(right);
                 case POWER:

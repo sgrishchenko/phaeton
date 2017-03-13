@@ -30,6 +30,8 @@ public class Point3DEvaluationContext extends StandardEvaluationContext {
     public Point3DEvaluationContext() {
         super();
         setVariable("c", this);
+        setVariable("zero", Point3D.ZERO);
+
         registerFunction("sum", ReflectionUtils.findMethod(getClass(), "sum", List.class));
     }
 

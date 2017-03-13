@@ -13,6 +13,11 @@ import javafx.scene.text.Text;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Transform;
 import javafx.scene.transform.Translate;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import vsu.sc.grishchenko.phaeton.model.Cluster;
 import vsu.sc.grishchenko.phaeton.model.MotionEquation;
@@ -25,33 +30,37 @@ import java.util.stream.IntStream;
 
 import static javafx.application.Platform.runLater;
 
-//@Component
-public class RunAnimate implements Runnable {
+@Component
+@PropertySource("classpath:forms/view3D.properties")
+public class Animation {
+    @Value("${animation.timeStep}")
+    private int timeStep;
+    @Value("${animation.scale}")
+    private double scale;
+
+    @Value("#{${animation.scale} * 0.4}")
     private double radius;
+    @Value("#{${animation.scale} * 0.2}")
     private double tailRadius;
+    @Value("#{${animation.scale} * 0.1}")
     private double linkRadius;
 
-    private List<AnimationCluster> animationClusters;
     private Map<String, MotionEquation> motionEquationMap;
+    private List<AnimationCluster> animationClusters;
     private LinkedList<List<Sphere>> frames = new LinkedList<>();
-    private ObservableList<Node> nodes;
 
-    private int timeStep;
     private long numberSteps;
-    private double scale;
 
     private int timePointer = 0;
     private boolean isPaused = false;
     private boolean isStopped = false;
 
-    public RunAnimate(List<Cluster> clusters, Group root, int timeStep, double scale) {
-        this.timeStep = timeStep;
-        this.scale = scale;
-        nodes = root.getChildren();
+    @Autowired
+    @Qualifier("atoms")
+    private Group atoms;
 
-        radius = 0.4 * scale;
-        tailRadius = 0.2 * scale;
-        linkRadius = 0.10 * scale;
+    public void setClusters(List<Cluster> clusters) {
+        atoms.getChildren().clear();
 
         motionEquationMap = clusters
                 .stream()
@@ -72,12 +81,15 @@ public class RunAnimate implements Runnable {
 
                             return new AnimationElement(atom, text, trajectory, links);
                         })
-                        .peek(animationElement -> nodes.add(animationElement.getGroup()))
-                        .collect(Collectors.toList())
-                ))
+                        .peek(animationElement -> atoms.getChildren().add(animationElement.getGroup()))
+                        .collect(Collectors.toList())))
                 .collect(Collectors.toList());
 
-        numberSteps = motionEquationMap.values().stream().mapToLong(t -> (long) t.getPath().size()).max().orElse(0);
+        numberSteps = motionEquationMap.values()
+                .stream()
+                .mapToLong(t -> (long) t.getPath().size())
+                .max()
+                .orElse(0);
     }
 
     private Sphere createAtom(Color color) {
@@ -136,7 +148,7 @@ public class RunAnimate implements Runnable {
                 .collect(Collectors.toList());
     }
 
-    @Override
+    @Async
     public void run() {
         while (!isStopped) {
             try {
@@ -229,12 +241,12 @@ public class RunAnimate implements Runnable {
         timePointer--;
 
         updateAtomsPosition(false);
-        frames.pop().forEach(nodes::remove);
+        frames.pop().forEach(atom -> atoms.getChildren().remove(atom));
     }
 
     public void reset() {
         timePointer = 0;
-        frames.stream().flatMap(Collection::stream).forEach(nodes::remove);
+        frames.stream().flatMap(Collection::stream).forEach(atom -> atoms.getChildren().remove(atom));
         frames.clear();
 
         updateAtomsPosition(false);

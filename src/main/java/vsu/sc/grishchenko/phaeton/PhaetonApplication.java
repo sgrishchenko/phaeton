@@ -5,13 +5,12 @@ import javafx.stage.Stage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.annotation.Bean;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
+import org.springframework.scheduling.annotation.EnableAsync;
 import vsu.sc.grishchenko.phaeton.main.Main;
 
 @SpringBootApplication
+@EnableAsync
 public class PhaetonApplication extends Application {
     private static String[] args;
     private ConfigurableApplicationContext context;

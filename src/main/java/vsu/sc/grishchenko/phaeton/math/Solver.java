@@ -37,8 +37,7 @@ public class Solver {
         context.setVariable("t", initialTime);
         context.setVariables(features.stream().collect(Collectors.toMap(
                 equation -> equation.getValue().getLabel(),
-                MotionEquationFeatures::getLastButOnePosition))
-        );
+                MotionEquationFeatures::getLastButOnePosition)));
 
         features.forEach(equation -> {
             Point3D initialAcceleration = (Point3D) equation.getExpression().getValue(context);

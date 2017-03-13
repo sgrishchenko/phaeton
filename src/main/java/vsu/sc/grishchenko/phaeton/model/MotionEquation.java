@@ -19,7 +19,7 @@ public class MotionEquation {
     /**
      * <p>Модуль суммы сил, действующих на частицу, описанный аналитическим выражением.</p>
      */
-    private String accelerationEquation = "0";
+    private String accelerationEquation = "#zero";
     /**
      * <p>Вектор начального положения частицы.</p>
      */

@@ -1,10 +1,12 @@
 package vsu.sc.grishchenko.phaeton.view3d;
 
+import javafx.collections.ListChangeListener;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.SubScene;
 import javafx.scene.layout.StackPane;
+import javafx.scene.text.Text;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Translate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +35,9 @@ public class View3DMouseEvents {
     @Autowired
     @Qualifier("subScene3D")
     private SubScene subScene;
+    @Autowired
+    @Qualifier("atoms")
+    private Group atoms;
 
     @Value("${camera.initial.x.angle}")
     private double cameraInitialXAngle;
@@ -50,16 +55,17 @@ public class View3DMouseEvents {
         Translate translate = new Translate();
         Rotate xRotate = new Rotate(cameraInitialXAngle, Rotate.X_AXIS);
         Rotate yRotate = new Rotate(cameraInitialYAngle, Rotate.Y_AXIS);
+        Rotate xTextRotate = new Rotate(-cameraInitialXAngle, Rotate.X_AXIS);
+        Rotate yTextRotate = new Rotate(-cameraInitialYAngle, Rotate.Y_AXIS);
         root.getTransforms().addAll(translate, xRotate, yRotate);
 
-        Set<Node> textNodes = root.lookupAll("Text");
-        Map<Node, Rotate> yTextRotateMap = textNodes.stream()
-                .collect(Collectors.toMap(Function.identity(), node -> new Rotate(-cameraInitialYAngle, Rotate.Y_AXIS)));
-        yTextRotateMap.forEach((node, rotate) -> node.getTransforms().add(rotate));
-
-        Map<Node, Rotate> xTextRotateMap = textNodes.stream()
-                .collect(Collectors.toMap(Function.identity(), node -> new Rotate(-cameraInitialYAngle, Rotate.X_AXIS)));
-        xTextRotateMap.forEach((node, rotate) -> node.getTransforms().add(rotate));
+        atoms.getChildren().addListener((ListChangeListener<Node>) change -> {
+            change.next();
+            change.getAddedSubList()
+                    .stream()
+                    .flatMap(node -> node.lookupAll("Text").stream())
+                    .forEach(node -> node.getTransforms().addAll(yTextRotate, xTextRotate));
+        });
 
         scene.setOnMousePressed(event -> {
             mouseOldX = event.getSceneX();
@@ -81,8 +87,8 @@ public class View3DMouseEvents {
             double deltaY = (mouseOldY - mouseY) * modifier;
 
             if (event.isPrimaryButtonDown()) {
-                xTextRotateMap.values().forEach(rotate -> rotate.setAngle(rotate.getAngle() + deltaY));
-                yTextRotateMap.values().forEach(rotate -> rotate.setAngle(rotate.getAngle() - deltaX));
+                xTextRotate.setAngle(xTextRotate.getAngle() + deltaY);
+                yTextRotate.setAngle(yTextRotate.getAngle() - deltaX);
 
                 xRotate.setAngle(xRotate.getAngle() - deltaY);
                 yRotate.setAngle(yRotate.getAngle() + deltaX);
