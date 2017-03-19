@@ -18,9 +18,6 @@ import java.util.logging.Logger;
 @Component
 @Configuration
 public class Main extends Application {
-    @Log
-    private Logger logger;
-
     @Autowired
     @Qualifier("mainScene")
     private Scene mainScene;

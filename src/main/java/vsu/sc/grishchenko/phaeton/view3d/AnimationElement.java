@@ -2,6 +2,7 @@ package vsu.sc.grishchenko.phaeton.view3d;
 
 import javafx.geometry.Point3D;
 import javafx.scene.Group;
+import javafx.scene.control.Label;
 import javafx.scene.shape.Cylinder;
 import javafx.scene.shape.Sphere;
 import javafx.scene.text.Text;
@@ -11,18 +12,18 @@ import java.util.Map;
 
 public class AnimationElement {
     private Sphere atom;
-    private Text text;
+    private Text label;
     private List<Point3D> trajectory;
     private Map<String, Cylinder> links;
     private Group group = new Group();
 
-    public AnimationElement(Sphere atom, Text text, List<Point3D> trajectory, Map<String, Cylinder> links) {
+    public AnimationElement(Sphere atom, Text label, List<Point3D> trajectory, Map<String, Cylinder> links) {
         this.atom = atom;
-        this.text = text;
+        this.label = label;
         this.trajectory = trajectory;
         this.links = links;
 
-        group.getChildren().addAll(atom, text);
+        group.getChildren().addAll(atom, label);
         group.getChildren().addAll(links.values());
     }
 
@@ -34,12 +35,12 @@ public class AnimationElement {
         this.atom = atom;
     }
 
-    public Text getText() {
-        return text;
+    public Text getLabel() {
+        return label;
     }
 
-    public void setText(Text text) {
-        this.text = text;
+    public void setLabel(Text label) {
+        this.label = label;
     }
 
     public List<Point3D> getTrajectory() {

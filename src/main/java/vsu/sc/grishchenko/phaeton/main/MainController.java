@@ -35,13 +35,11 @@ public class MainController implements Initializable {
     @Autowired
     private EditService editService;
     @Autowired
+    private ExperimentService experimentService;
+    @Autowired
     private SpelExpressionParser parser;
     @Autowired
     private StandardEvaluationContext context;
-    @Autowired
-    private View3D view3D;
-    @Autowired
-    private Solver solver;
 
     private Map<TreeItem<Object>, CheckBox> checkBoxMap = new HashMap<>();
 
@@ -153,6 +151,12 @@ public class MainController implements Initializable {
         editService.deleteSelected(clusterMenu, checkBoxMap);
     }
 
+    public void run() throws Exception {
+        @SuppressWarnings("unchecked")
+        List<Cluster> clusters = (List<Cluster>) table.getRoot().getValue();
+        experimentService.run(clusters);
+    }
+
     private CheckBox createCheckBox(TreeTableColumn.CellDataFeatures<Object, Object> cell) {
         CheckBox checkBox = new CheckBox();
         checkBoxMap.put(cell.getValue(), checkBox);
@@ -176,18 +180,5 @@ public class MainController implements Initializable {
                     .forEach(childCheckBox -> childCheckBox.setSelected(checkBox.isSelected()));
         });
         return checkBox;
-    }
-
-    public void run() throws Exception {
-        @SuppressWarnings("unchecked")
-        List<Cluster> clusters = (List<Cluster>) table.getRoot().getValue();
-        solver.solve(clusters
-                .stream()
-                .flatMap(cluster -> cluster.getMotionEquations().stream())
-                .collect(Collectors.toList()), 0, 1000, 0.001);
-
-        view3D.stop();
-        view3D.setClusters(clusters);
-        view3D.start();
     }
 }

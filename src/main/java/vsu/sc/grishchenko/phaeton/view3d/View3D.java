@@ -32,7 +32,7 @@ public class View3D extends Application {
         primaryStage.setScene(scene);
         primaryStage.show();
 
-        animation.run();
+        animation.start();
         primaryStage.setOnCloseRequest(event -> animation.stop());
     }
 

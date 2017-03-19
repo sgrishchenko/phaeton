@@ -4,6 +4,7 @@ import javafx.collections.ObservableList;
 import javafx.geometry.Point3D;
 import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.control.Label;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Cylinder;
@@ -38,18 +39,11 @@ public class Animation {
     @Value("${animation.scale}")
     private double scale;
 
-    @Value("#{${animation.scale} * 0.4}")
-    private double radius;
-    @Value("#{${animation.scale} * 0.2}")
-    private double tailRadius;
-    @Value("#{${animation.scale} * 0.1}")
-    private double linkRadius;
-
     private Map<String, MotionEquation> motionEquationMap;
     private List<AnimationCluster> animationClusters;
     private LinkedList<List<Sphere>> frames = new LinkedList<>();
 
-    private long numberSteps;
+    private int numberSteps;
 
     private int timePointer = 0;
     private boolean isPaused = false;
@@ -58,6 +52,8 @@ public class Animation {
     @Autowired
     @Qualifier("atoms")
     private Group atoms;
+    @Autowired
+    private AnimationElementFactory animationElementFactory;
 
     public void setClusters(List<Cluster> clusters) {
         atoms.getChildren().clear();
@@ -67,71 +63,32 @@ public class Animation {
                 .flatMap(cluster -> cluster.getMotionEquations().stream())
                 .collect(Collectors.toMap(MotionEquation::getLabel, Function.identity()));
 
+        numberSteps = motionEquationMap.values()
+                .stream()
+                .mapToInt(t -> t.getPath().size())
+                .max()
+                .orElse(0);
+
         animationClusters = clusters
                 .stream()
                 .map(cluster -> new AnimationCluster(getGravityCenterPath(cluster), cluster.getMotionEquations()
                         .stream()
                         .map(equation -> {
-                            Sphere atom = createAtom(equation.getColor());
-                            Text text = createText(equation.getLabel());
+                            Sphere atom = animationElementFactory.createAtom(equation.getColor());
+                            Text label = animationElementFactory.createLabel(equation.getLabel(), atom);
                             List<Point3D> trajectory = equation.getPath();
                             Map<String, Cylinder> links = equation.getLinkLabels()
                                     .stream()
-                                    .collect(Collectors.toMap(Function.identity(), label -> createLink()));
+                                    .collect(Collectors.toMap(Function.identity(),
+                                            linkLabel -> animationElementFactory.createLink()));
 
-                            return new AnimationElement(atom, text, trajectory, links);
+                            return new AnimationElement(atom, label, trajectory, links);
                         })
                         .peek(animationElement -> atoms.getChildren().add(animationElement.getGroup()))
                         .collect(Collectors.toList())))
                 .collect(Collectors.toList());
-
-        numberSteps = motionEquationMap.values()
-                .stream()
-                .mapToLong(t -> (long) t.getPath().size())
-                .max()
-                .orElse(0);
     }
 
-    private Sphere createAtom(Color color) {
-        PhongMaterial material = new PhongMaterial(color);
-        material.setSpecularColor(color.darker());
-
-        Sphere atom = new Sphere(radius);
-        atom.setMaterial(material);
-
-        return atom;
-    }
-
-    private Sphere createTail(Point3D translate) {
-        PhongMaterial material = new PhongMaterial(Color.GRAY);
-        material.setSpecularColor(Color.GRAY.darker());
-
-        Sphere atom = new Sphere(radius);
-        atom.setMaterial(material);
-        atom.setTranslateX(translate.getX());
-        atom.setTranslateY(translate.getY());
-        atom.setTranslateZ(translate.getZ());
-
-        return atom;
-    }
-
-
-    private Text createText(String label) {
-        Text text = new Text(label);
-        text.setFont(new Font(12));
-        text.setFill(Color.BLACK);
-        return text;
-    }
-
-    private Cylinder createLink() {
-        PhongMaterial material = new PhongMaterial(Color.GRAY);
-        material.setSpecularColor(Color.GRAY.darker());
-
-        Cylinder link = new Cylinder(linkRadius, 0);
-        link.setMaterial(material);
-
-        return link;
-    }
 
     private List<Point3D> getGravityCenterPath(Cluster cluster) {
         double weightSum = cluster.getMotionEquations()
@@ -139,34 +96,13 @@ public class Animation {
                 .mapToDouble(MotionEquation::getWeight)
                 .sum();
 
-        return IntStream.range(0, cluster.getMotionEquations().size())
+        return IntStream.range(0, numberSteps)
                 .mapToObj(index -> cluster.getMotionEquations()
                         .stream()
                         .map(t -> t.getPath().get(index).multiply(t.getWeight() * scale))
                         .reduce(Point3D.ZERO, Point3D::add)
                         .multiply(1 / weightSum))
                 .collect(Collectors.toList());
-    }
-
-    @Async
-    public void run() {
-        while (!isStopped) {
-            try {
-                Thread.sleep(timeStep);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
-            if (!isPaused) runLater(this::next);
-        }
-    }
-
-    public void play() {
-        isPaused = false;
-    }
-
-    public void pause() {
-        isPaused = true;
     }
 
     private List<Sphere> updateAtomsPosition(boolean addTail) {
@@ -176,6 +112,7 @@ public class Animation {
             for (AnimationElement animationElement : animationCluster.getElements()) {
 
                 Sphere atom = animationElement.getAtom();
+                double radius = atom.getRadius();
                 List<Point3D> trajectory = animationElement.getTrajectory();
 
                 for (Node node : animationElement.getGroup().getChildren()) {
@@ -184,10 +121,10 @@ public class Animation {
                     node.setTranslateZ(trajectory.get(timePointer).getZ() * scale);
                 }
 
-                Text text = animationElement.getText();
-                text.setTranslateX(text.getTranslateX() + radius);
-                text.setTranslateY(text.getTranslateY() + radius);
-                text.setTranslateZ(text.getTranslateZ() + radius);
+                Text label = animationElement.getLabel();
+                label.setTranslateX(label.getTranslateX() + radius);
+                label.setTranslateY(label.getTranslateY() + radius);
+                label.setTranslateZ(label.getTranslateZ() + radius);
 
                 for (Map.Entry<String, Cylinder> linkEntry : animationElement.getLinks().entrySet()) {
                     Point3D linkedPoint = motionEquationMap.get(linkEntry.getKey()).getPath().get(timePointer).multiply(scale);
@@ -212,18 +149,43 @@ public class Animation {
                 }
             }
 
-            /*if (!addTail) continue;
+            if (!addTail) continue;
             Point3D oldGravityCenter = animationCluster.getGravityCenterPath().get(Math.max(0, timePointer - 1));
             Point3D newGravityCenter = animationCluster.getGravityCenterPath().get(timePointer);
 
             if (!oldGravityCenter.equals(newGravityCenter)) {
-                Sphere tail = createTail(newGravityCenter);
-                nodes.add(tail);
+                Sphere tail = animationElementFactory.createTail(newGravityCenter);
+                atoms.getChildren().add(tail);
                 frame.add(tail);
-            }*/
+            }
         }
 
         return frame;
+    }
+
+    @Async
+    public void start() {
+        while (!isStopped) {
+            try {
+                Thread.sleep(timeStep);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            if (!isPaused) runLater(this::next);
+        }
+    }
+
+    public void stop() {
+        isStopped = true;
+    }
+
+    public void play() {
+        isPaused = false;
+    }
+
+    public void pause() {
+        isPaused = true;
     }
 
     public void next() {
@@ -250,9 +212,5 @@ public class Animation {
         frames.clear();
 
         updateAtomsPosition(false);
-    }
-
-    public void stop() {
-        isStopped = true;
     }
 }

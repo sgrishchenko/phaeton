@@ -5,8 +5,11 @@ import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.SubScene;
+import javafx.scene.control.*;
 import javafx.scene.layout.StackPane;
+import javafx.scene.shape.Sphere;
 import javafx.scene.text.Text;
+import javafx.scene.transform.NonInvertibleTransformException;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Translate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,22 +53,22 @@ public class View3DMouseEvents {
     private double shiftMultiplier;
 
     @PostConstruct
-    private void handleMouse() {
+    private void handleMouse() throws NonInvertibleTransformException {
         Group root = (Group) subScene.getRoot();
         Translate translate = new Translate();
         Rotate xRotate = new Rotate(cameraInitialXAngle, Rotate.X_AXIS);
         Rotate yRotate = new Rotate(cameraInitialYAngle, Rotate.Y_AXIS);
-        Rotate xTextRotate = new Rotate(-cameraInitialXAngle, Rotate.X_AXIS);
-        Rotate yTextRotate = new Rotate(-cameraInitialYAngle, Rotate.Y_AXIS);
+        Rotate xTextRotate = (Rotate) xRotate.createInverse();
+        Rotate yTextRotate = (Rotate) yRotate.createInverse();
         root.getTransforms().addAll(translate, xRotate, yRotate);
 
-        atoms.getChildren().addListener((ListChangeListener<Node>) change -> {
+        /*atoms.getChildren().addListener((ListChangeListener<Node>) change -> {
             change.next();
             change.getAddedSubList()
                     .stream()
-                    .flatMap(node -> node.lookupAll("Text").stream())
+                    .flatMap(node -> node.lookupAll("Label").stream())
                     .forEach(node -> node.getTransforms().addAll(yTextRotate, xTextRotate));
-        });
+        });*/
 
         scene.setOnMousePressed(event -> {
             mouseOldX = event.getSceneX();
@@ -92,6 +95,17 @@ public class View3DMouseEvents {
 
                 xRotate.setAngle(xRotate.getAngle() - deltaY);
                 yRotate.setAngle(yRotate.getAngle() + deltaX);
+
+                /*atoms.getChildren()
+                        .stream()
+                        .flatMap(node -> node.lookupAll("Label").stream())
+                        .forEach(label -> {
+                            Sphere atom = (Sphere) ((Label) label).getLabelFor();
+                            double radius = atom.getRadius();
+                            label.setTranslateX(atom.getTranslateX() + radius);
+                            label.setTranslateY(atom.getTranslateY() + radius);
+                            label.setTranslateZ(atom.getTranslateZ() + radius);
+                        });*/
             } else if (event.isSecondaryButtonDown()) {
                 double delta = Math.abs(deltaX) > Math.abs(deltaY) ? deltaX : deltaY;
                 root.setTranslateZ(root.getTranslateZ() + delta * modifier);
