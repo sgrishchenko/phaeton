@@ -5,10 +5,6 @@ import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.SubScene;
-import javafx.scene.control.*;
-import javafx.scene.layout.StackPane;
-import javafx.scene.shape.Sphere;
-import javafx.scene.text.Text;
 import javafx.scene.transform.NonInvertibleTransformException;
 import javafx.scene.transform.Rotate;
 import javafx.scene.transform.Translate;
@@ -19,10 +15,6 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Component
 @PropertySource("classpath:forms/view3D.properties")
@@ -42,10 +34,12 @@ public class View3DMouseEvents {
     @Qualifier("atoms")
     private Group atoms;
 
-    @Value("${camera.initial.x.angle}")
+    @Value("${camera.initial.angle.x}")
     private double cameraInitialXAngle;
-    @Value("${camera.initial.y.angle}")
+    @Value("${camera.initial.angle.y}")
     private double cameraInitialYAngle;
+    @Value("${camera.initial.angle.z}")
+    private double cameraInitialZAngle;
 
     @Value("${control.multiplier}")
     private double controlMultiplier;
@@ -58,16 +52,18 @@ public class View3DMouseEvents {
         Translate translate = new Translate();
         Rotate xRotate = new Rotate(cameraInitialXAngle, Rotate.X_AXIS);
         Rotate yRotate = new Rotate(cameraInitialYAngle, Rotate.Y_AXIS);
+        Rotate zRotate = new Rotate(cameraInitialZAngle, Rotate.Z_AXIS);
         Rotate xTextRotate = (Rotate) xRotate.createInverse();
         Rotate yTextRotate = (Rotate) yRotate.createInverse();
-        root.getTransforms().addAll(translate, xRotate, yRotate);
+        Rotate zTextRotate = (Rotate) zRotate.createInverse();
+        root.getTransforms().addAll(translate, xRotate, yRotate, zRotate);
 
         atoms.getChildren().addListener((ListChangeListener<Node>) change -> {
             change.next();
             change.getAddedSubList()
                     .stream()
                     .flatMap(node -> node.lookupAll("Label").stream())
-                    .forEach(node -> node.getTransforms().addAll(yTextRotate, xTextRotate));
+                    .forEach(node -> node.getTransforms().addAll(zTextRotate, yTextRotate, xTextRotate));
         });
 
         scene.setOnMousePressed(event -> {
@@ -90,11 +86,14 @@ public class View3DMouseEvents {
             double deltaY = (mouseOldY - mouseY) * modifier;
 
             if (event.isPrimaryButtonDown()) {
-                xTextRotate.setAngle(xTextRotate.getAngle() + deltaY);
-                yTextRotate.setAngle(yTextRotate.getAngle() - deltaX);
-
                 xRotate.setAngle(xRotate.getAngle() - deltaY);
-                yRotate.setAngle(yRotate.getAngle() + deltaX);
+                xTextRotate.setAngle(xTextRotate.getAngle() + deltaY);
+
+                double sign = Math.signum(180 - Math.abs(xRotate.getAngle() % 360))
+                        * Math.signum(xRotate.getAngle());
+
+                zRotate.setAngle(zRotate.getAngle() - deltaX * sign);
+                zTextRotate.setAngle(zTextRotate.getAngle() + deltaX * sign);
             } else if (event.isSecondaryButtonDown()) {
                 double delta = Math.abs(deltaX) > Math.abs(deltaY) ? deltaX : deltaY;
                 root.setTranslateZ(root.getTranslateZ() + delta * modifier);

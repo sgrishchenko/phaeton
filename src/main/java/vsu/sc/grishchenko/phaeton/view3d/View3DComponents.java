@@ -100,16 +100,17 @@ public class View3DComponents {
         buttons.setAlignment(Pos.BOTTOM_CENTER);
 
         new LinkedHashMap<String, Consumer<Button>>() {{
-            put("save", button -> simpleHandler(button, () -> System.out.println("save")));
+            put("prev-rewind", button -> rewindHandler(button, stopper -> animation.prevRewind(stopper)));
+            put("prev", button -> simpleHandler(button, animation::prev));
             put("play", button -> simpleHandler(button, animation::play));
             put("pause", button -> simpleHandler(button, animation::pause));
             put("reset", button -> simpleHandler(button, animation::reset));
-            put("prev", button -> simpleHandler(button, animation::prev));
             put("next", button -> simpleHandler(button, animation::next));
-            put("prevRewind", button -> rewindHandler(button, stopper -> animation.prevRewind(stopper)));
-            put("nextRewind", button -> rewindHandler(button, stopper -> animation.nextRewind(stopper)));
+            put("next-rewind", button -> rewindHandler(button, stopper -> animation.nextRewind(stopper)));
+            put("save", button -> simpleHandler(button, () -> System.out.println("save")));
+            put("info", button -> simpleHandler(button, () -> System.out.println("info")));
         }}.forEach((name, handler) -> {
-            Image image = new Image(getClass().getResourceAsStream(String.format("/icons/%s.png", name)));
+            Image image = new Image(String.format("/icons/%s.png", name));
             Button button = new Button("", new ImageView(image));
             handler.accept(button);
             buttons.getChildren().add(button);
