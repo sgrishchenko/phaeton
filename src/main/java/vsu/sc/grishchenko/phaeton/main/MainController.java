@@ -45,19 +45,6 @@ public class MainController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-
-        /*Point3D r = new Point3D(1, 1, 1);
-        context.setVariable("x1", new Point3D(1, 2, 3));
-        context.setVariable("x2", new Point3D(2, 2, 2));
-        context.setVariable("x3", r);
-        context.setVariable("y", new Point3D(3, 2, 1));
-        context.setRootObject(r);
-
-         Object res = parser.parseExpression(
-                "#c.sum('x', '#x + #this')"
-                //"#sum(#c.vars.?[key matches '^x.+'].?[value ne #root].![value + #root])"
-        ).getValue(context);*/
-
         table.setRoot(new TreeItem<>(new ArrayList<>()));
         table.getColumns().forEach(column -> {
             String expression = (String) column.getUserData();

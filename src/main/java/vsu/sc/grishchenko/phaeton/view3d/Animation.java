@@ -1,19 +1,12 @@
 package vsu.sc.grishchenko.phaeton.view3d;
 
-import javafx.collections.ObservableList;
 import javafx.geometry.Point3D;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
-import javafx.scene.paint.Color;
-import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Cylinder;
 import javafx.scene.shape.Sphere;
-import javafx.scene.text.Font;
-import javafx.scene.text.Text;
 import javafx.scene.transform.Rotate;
-import javafx.scene.transform.Transform;
-import javafx.scene.transform.Translate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,7 +18,7 @@ import vsu.sc.grishchenko.phaeton.model.MotionEquation;
 
 import java.util.*;
 import java.util.function.Function;
-import java.util.stream.Collector;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -75,7 +68,7 @@ public class Animation {
                         .stream()
                         .map(equation -> {
                             Sphere atom = animationElementFactory.createAtom(equation.getColor());
-                            Text label = animationElementFactory.createLabel(equation.getLabel(), atom);
+                            Label label = animationElementFactory.createLabel(equation.getLabel(), atom);
                             List<Point3D> trajectory = equation.getPath();
                             Map<String, Cylinder> links = equation.getLinkLabels()
                                     .stream()
@@ -121,7 +114,7 @@ public class Animation {
                     node.setTranslateZ(trajectory.get(timePointer).getZ() * scale);
                 }
 
-                Text label = animationElement.getLabel();
+                Label label = animationElement.getLabel();
                 label.setTranslateX(label.getTranslateX() + radius);
                 label.setTranslateY(label.getTranslateY() + radius);
                 label.setTranslateZ(label.getTranslateZ() + radius);
@@ -136,9 +129,10 @@ public class Animation {
                     link.setTranslateY(link.getTranslateY() + link.getHeight() / 2);
 
                     double dx = atom.getTranslateX() - linkedPoint.getX();
-                    double dz = atom.getTranslateZ() - linkedPoint.getZ();
-                    double dxz = Math.sqrt(dx * dx + dz * dz);
                     double dy = atom.getTranslateY() - linkedPoint.getY();
+                    double dz = atom.getTranslateZ() - linkedPoint.getZ();
+
+                    double dxz = Math.sqrt(dx * dx + dz * dz);
 
                     double xAngle = Math.toDegrees(Math.atan2(dy, dxz));
                     double zAngle = Math.toDegrees(Math.atan2(dx, dz));
@@ -165,19 +159,40 @@ public class Animation {
 
     @Async
     public void start() {
-        while (!isStopped) {
+        isStopped = false;
+        isPaused = false;
+        rewind(() -> !isStopped, () -> {
+            if (!isPaused) this.next();
+        });
+    }
+
+    @Async
+    public void prevRewind(Supplier<Boolean> stopper) {
+        pause();
+        rewind(stopper, this::prev);
+    }
+
+    @Async
+    public void nextRewind(Supplier<Boolean> stopper) {
+        pause();
+        rewind(stopper, this::next);
+    }
+
+    private void rewind(Supplier<Boolean> stopper, Runnable action) {
+        while (stopper.get()) {
             try {
                 Thread.sleep(timeStep);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
 
-            if (!isPaused) runLater(this::next);
+            runLater(action);
         }
     }
 
     public void stop() {
         isStopped = true;
+        timePointer = 0;
     }
 
     public void play() {
@@ -207,8 +222,11 @@ public class Animation {
     }
 
     public void reset() {
+        pause();
         timePointer = 0;
-        frames.stream().flatMap(Collection::stream).forEach(atom -> atoms.getChildren().remove(atom));
+        frames.stream()
+                .flatMap(Collection::stream)
+                .forEach(atom -> atoms.getChildren().remove(atom));
         frames.clear();
 
         updateAtomsPosition(false);

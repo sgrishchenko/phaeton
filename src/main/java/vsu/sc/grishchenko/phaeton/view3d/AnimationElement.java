@@ -5,19 +5,18 @@ import javafx.scene.Group;
 import javafx.scene.control.Label;
 import javafx.scene.shape.Cylinder;
 import javafx.scene.shape.Sphere;
-import javafx.scene.text.Text;
 
 import java.util.List;
 import java.util.Map;
 
 public class AnimationElement {
     private Sphere atom;
-    private Text label;
+    private Label label;
     private List<Point3D> trajectory;
     private Map<String, Cylinder> links;
     private Group group = new Group();
 
-    public AnimationElement(Sphere atom, Text label, List<Point3D> trajectory, Map<String, Cylinder> links) {
+    public AnimationElement(Sphere atom, Label label, List<Point3D> trajectory, Map<String, Cylinder> links) {
         this.atom = atom;
         this.label = label;
         this.trajectory = trajectory;
@@ -31,32 +30,16 @@ public class AnimationElement {
         return atom;
     }
 
-    public void setAtom(Sphere atom) {
-        this.atom = atom;
-    }
-
-    public Text getLabel() {
+    public Label getLabel() {
         return label;
-    }
-
-    public void setLabel(Text label) {
-        this.label = label;
     }
 
     public List<Point3D> getTrajectory() {
         return trajectory;
     }
 
-    public void setTrajectory(List<Point3D> trajectory) {
-        this.trajectory = trajectory;
-    }
-
     public Map<String, Cylinder> getLinks() {
         return links;
-    }
-
-    public void setLinks(Map<String, Cylinder> links) {
-        this.links = links;
     }
 
     public Group getGroup() {

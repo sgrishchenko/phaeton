@@ -62,13 +62,13 @@ public class View3DMouseEvents {
         Rotate yTextRotate = (Rotate) yRotate.createInverse();
         root.getTransforms().addAll(translate, xRotate, yRotate);
 
-        /*atoms.getChildren().addListener((ListChangeListener<Node>) change -> {
+        atoms.getChildren().addListener((ListChangeListener<Node>) change -> {
             change.next();
             change.getAddedSubList()
                     .stream()
                     .flatMap(node -> node.lookupAll("Label").stream())
                     .forEach(node -> node.getTransforms().addAll(yTextRotate, xTextRotate));
-        });*/
+        });
 
         scene.setOnMousePressed(event -> {
             mouseOldX = event.getSceneX();
@@ -95,17 +95,6 @@ public class View3DMouseEvents {
 
                 xRotate.setAngle(xRotate.getAngle() - deltaY);
                 yRotate.setAngle(yRotate.getAngle() + deltaX);
-
-                /*atoms.getChildren()
-                        .stream()
-                        .flatMap(node -> node.lookupAll("Label").stream())
-                        .forEach(label -> {
-                            Sphere atom = (Sphere) ((Label) label).getLabelFor();
-                            double radius = atom.getRadius();
-                            label.setTranslateX(atom.getTranslateX() + radius);
-                            label.setTranslateY(atom.getTranslateY() + radius);
-                            label.setTranslateZ(atom.getTranslateZ() + radius);
-                        });*/
             } else if (event.isSecondaryButtonDown()) {
                 double delta = Math.abs(deltaX) > Math.abs(deltaY) ? deltaX : deltaY;
                 root.setTranslateZ(root.getTranslateZ() + delta * modifier);

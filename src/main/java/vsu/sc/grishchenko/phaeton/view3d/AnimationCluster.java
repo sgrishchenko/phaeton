@@ -17,15 +17,7 @@ public class AnimationCluster {
         return gravityCenterPath;
     }
 
-    public void setGravityCenterPath(List<Point3D> gravityCenterPath) {
-        this.gravityCenterPath = gravityCenterPath;
-    }
-
     public List<AnimationElement> getElements() {
         return elements;
-    }
-
-    public void setElements(List<AnimationElement> elements) {
-        this.elements = elements;
     }
 }

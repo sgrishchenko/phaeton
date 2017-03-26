@@ -50,9 +50,11 @@ public class AnimationElementFactory {
     }
 
 
-    public Text createLabel(String labelText, Sphere atom) {
-        Text label = new Text(labelText/*, atom*/);
+    public Label createLabel(String labelText, Sphere atom) {
+        Label label = new Label(labelText);
+        label.setLabelFor(atom);
         label.setFont(new Font(textSize));
+        label.setTextFill(Color.BLACK);
         return label;
     }
 

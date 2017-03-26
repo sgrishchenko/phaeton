@@ -1,7 +1,5 @@
 package vsu.sc.grishchenko.phaeton.view3d;
 
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.*;
@@ -13,8 +11,8 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Cylinder;
-import javafx.scene.text.Text;
 import javafx.scene.transform.Rotate;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -24,12 +22,15 @@ import org.springframework.context.annotation.PropertySource;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import static javafx.scene.SceneAntialiasing.BALANCED;
 
 @Configuration
 @PropertySource("classpath:forms/view3D.properties")
 public class View3DComponents {
+    private boolean isButtonPressed;
 
     @Value("${scene.width}")
     private double sceneWidth;
@@ -47,6 +48,11 @@ public class View3DComponents {
 
     @Value("${axis.length}")
     private double axisLength;
+    @Value("${animation.timeStep}")
+    private int timeStep;
+
+    @Autowired
+    private Animation animation;
 
     @Bean
     public Scene scene3D(@Qualifier("subScene3D") SubScene subScene,
@@ -93,23 +99,36 @@ public class View3DComponents {
         buttons.setPadding(new Insets(5));
         buttons.setAlignment(Pos.BOTTOM_CENTER);
 
-        new LinkedHashMap<String, EventHandler<ActionEvent>>() {{
-            put("save", e -> System.out.println("save"));
-            put("play", e -> System.out.println("play"));
-            put("pause", e -> System.out.println("pause"));
-            put("reset", e -> System.out.println("reset"));
-            put("prev", e -> System.out.println("prev"));
-            put("next", e -> System.out.println("next"));
-            put("prevRewind", e -> System.out.println("prevRewind"));
-            put("nextRewind", e -> System.out.println("nextRewind"));
+        new LinkedHashMap<String, Consumer<Button>>() {{
+            put("save", button -> simpleHandler(button, () -> System.out.println("save")));
+            put("play", button -> simpleHandler(button, animation::play));
+            put("pause", button -> simpleHandler(button, animation::pause));
+            put("reset", button -> simpleHandler(button, animation::reset));
+            put("prev", button -> simpleHandler(button, animation::prev));
+            put("next", button -> simpleHandler(button, animation::next));
+            put("prevRewind", button -> rewindHandler(button, stopper -> animation.prevRewind(stopper)));
+            put("nextRewind", button -> rewindHandler(button, stopper -> animation.nextRewind(stopper)));
         }}.forEach((name, handler) -> {
             Image image = new Image(getClass().getResourceAsStream(String.format("/icons/%s.png", name)));
             Button button = new Button("", new ImageView(image));
-            button.setOnAction(handler);
+            handler.accept(button);
             buttons.getChildren().add(button);
         });
 
         return buttons;
+    }
+
+    private void simpleHandler(Button button, Runnable action) {
+        button.setOnAction(e -> action.run());
+    }
+
+    private void rewindHandler(Button button, Consumer<Supplier<Boolean>> rewindAction) {
+        button.setOnMousePressed(e -> {
+            isButtonPressed = true;
+            rewindAction.accept(() -> isButtonPressed);
+        });
+
+        button.setOnMouseReleased(e -> isButtonPressed = false);
     }
 
     @Bean
